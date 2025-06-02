@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>XML File Download, Analysis, and Part Extraction Tool</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+    }
+    select, button {
+      margin: 20px;
+      padding: 10px;
+    }
+    #partInfo {
+      margin-top: 20px;
+    }
+    pre {
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+  </style>
+</head>
+<body>
+  <h1>Select an XML File to Download, Analyze, and Extract Parts</h1>
+
+  <!-- Dropdown to select XML file -->
+  <select id="xmlSelect">
+    <option value="">-- Select an XML File --</option>
+    <!-- Options will be populated dynamically -->
+  </select>
+  <button id="analyzeButton">Analyze</button>
+
+  <!-- Section to display part information -->
+  <div id="partInfo"></div>
+  <pre id="output">Waiting for file...</pre>
+
+  <!-- Dropdown for part downloads -->
+  <h2>Select a Part to Download</h2>
+  <select id="partSelect">
+    <option value="">-- Select a Part --</option>
+  </select>
+
+  <!-- Buttons for download -->
+  <button id="downloadFileButton">Download Full XML File</button>
+  <button id="downloadPartButton">Download Selected Part</button>
+
+  <script>
+    let partInfo = [];
+
+    const files = [
+      { name: 'tbm.xml', url: 'https://raw.githubusercontent.com/georgeharrisca/5/ab3dc973cdbd92eff65d312934e2cca53122bd91/tbm.xml' },
+    ];
+
+    const selectElement = document.getElementById('xmlSelect');
+    files.forEach(file => {
+      const option = document.createElement('option');
+      option.value = file.url;
+      option.textContent = file.name;
+      selectElement.appendChild(option);
+    });
+
+    function downloadFile() {
+      const selectedFile = selectElement.value;
+      if (selectedFile) {
+        window.location.href = selectedFile;
+      } else {
+        alert('Please select a file to download');
+      }
+    }
+
+    async function analyzeFile() {
+      const selectedUrl = selectElement.value;
+      if (!selectedUrl) {
+        alert('Please select a file to analyze');
+        return;
+      }
+
+      const output = document.getElementById("output");
+      output.innerText = "Analyzing file...";
+
+      try {
+        console.log("Fetching XML file from:", selectedUrl);
+        const response = await fetch(selectedUrl);
+        const xmlText = await response.text();
+
+        partInfo = extractParts(xmlText);
+        if (partInfo.length === 0) {
+          console.log("No parts found.");
+        }
+        displayPartInfo(partInfo);
+        populatePartSelect(partInfo);
+      } catch (err) {
+        output.innerText = "An error occurred:\n" + err.message;
+        console.error(err);
+      }
+    }
+
+    function extractParts(xmlText) {
+      const partInfo = [];
+      const parser = new DOMParser();
+      const musicDoc = parser.parseFromString(xmlText, "application/xml");
+
+      const scoreParts = musicDoc.getElementsByTagName("score-part");
+      for (let i = 0; i < scoreParts.length; i++) {
+        const part = scoreParts[i];
+        const id = part.getAttribute("id");
+        const nameNode = part.getElementsByTagName("part-name")[0];
+        const name = nameNode ? nameNode.textContent : "(no name)";
+        
+        const partXML = part.outerHTML;
+        partInfo.push({ id, name, xml: partXML });
+      }
+
+      return partInfo;
+    }
+
+    function displayPartInfo(partInfo) {
+      const partInfoContainer = document.getElementById('partInfo');
+      partInfoContainer.innerHTML = '';
+      partInfo.forEach(info => {
+        const paragraph = document.createElement('p');
+        paragraph.textContent = `${info.id}: ${info.name}`;
+        partInfoContainer.appendChild(paragraph);
+      });
+    }
+
+    function populatePartSelect(partFiles) {
+      const partSelect = document.getElementById("partSelect");
+      partSelect.innerHTML = '<option value="">-- Select a Part --</option>';
+      partFiles.forEach(part => {
+        const option = document.createElement('option');
+        option.value = part.id;
+        option.textContent = part.name;
+        partSelect.appendChild(option);
+      });
+    }
+
+    async function downloadSelectedPart() {
+      const selectedPartId = document.getElementById("partSelect").value;
+      if (!selectedPartId) {
+        alert("Please select a part to download.");
+        return;
+      }
+
+      const output = document.getElementById("output");
+      output.innerText = "Downloading part...";
+
+      try {
+        if (!Array.isArray(partInfo) || partInfo.length === 0) {
+          console.error("partInfo is invalid or empty");
+          alert("No part information found.");
+          return;
+        }
+
+        const selectedPart = partInfo.find(part => part.id === selectedPartId);
+        if (!selectedPart) {
+          alert("Selected part not found.");
+          return;
+        }
+
+        const partXMLString = selectedPart.xml;
+        if (!partXMLString) {
+          console.error("No part XML found for the selected part");
+          alert("No XML content for the selected part.");
+          return;
+        }
+
+        const partBlob = new Blob([partXMLString], { type: "application/xml" });
+        const url = URL.createObjectURL(partBlob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `${selectedPart.name}_${selectedPart.id}.xml`; // Download XML file directly
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      } catch (err) {
+        console.error("Error while downloading the part:", err);
+        output.innerText = "Error occurred while downloading the part.";
+      }
+    }
+
+    document.getElementById("analyzeButton").addEventListener("click", analyzeFile);
+    document.getElementById("downloadFileButton").addEventListener("click", downloadFile);
+    document.getElementById("downloadPartButton").addEventListener("click", downloadSelectedPart);
+  </script>
+</body>
+</html>
