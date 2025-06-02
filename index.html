@@ -181,7 +181,23 @@
           return;
         }
 
-        const partBlob = new Blob([partXMLString], { type: "application/xml" });
+        // Wrap the part's XML in a complete MusicXML structure
+        const wrappedXML = `
+          <?xml version="1.0" encoding="UTF-8"?>
+          <score-partwise version="3.1">
+            <part-list>
+              <score-part id="${selectedPart.id}">
+                <part-name>${selectedPart.name}</part-name>
+              </score-part>
+            </part-list>
+            <part id="${selectedPart.id}">
+              ${partXMLString}
+            </part>
+          </score-partwise>
+        `;
+
+        // Create the Blob with the wrapped XML
+        const partBlob = new Blob([wrappedXML], { type: "application/xml" });
         const url = URL.createObjectURL(partBlob);
         const link = document.createElement("a");
         link.href = url;
