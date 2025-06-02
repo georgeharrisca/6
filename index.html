@@ -182,8 +182,9 @@
           return;
         }
 
-        // Wrap the part's XML in a complete MusicXML structure without XML declaration
-        const wrappedXML = `
+        // Add XML declaration to ensure the file is recognized by software
+        const xmlDeclaration = '<?xml version="1.0" encoding="UTF-8"?>\n';
+        const wrappedXML = xmlDeclaration + `
           <score-partwise version="3.1">
             <work>
               <work-title>Sample Work</work-title>
@@ -200,7 +201,7 @@
           </score-partwise>
         `;
 
-        // Create the Blob with the wrapped XML, ensuring no XML declaration
+        // Create the Blob with the wrapped XML, ensuring the XML declaration is included
         const partBlob = new Blob([wrappedXML], { type: "application/xml" });
         const url = URL.createObjectURL(partBlob);
         const link = document.createElement("a");
