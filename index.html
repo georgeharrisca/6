@@ -191,24 +191,28 @@
             </work>
             <movement-title>Sample Movement</movement-title>
             <part-list>
-              <score-part id="${selectedPart.id}">
-                <part-name>${selectedPart.name}</part-name>
-              </score-part>
+              ${partInfo.map(part => `
+                <score-part id="${part.id}">
+                  <part-name>${part.name}</part-name>
+                </score-part>
+              `).join('')}
             </part-list>
-            <part id="${selectedPart.id}">
-              <!-- Placeholder measure -->
-              <measure number="1">
-                <note>
-                  <pitch>
-                    <step>C</step>
-                    <octave>4</octave>
-                  </pitch>
-                  <duration>4</duration>
-                  <type>quarter</type>
-                </note>
-              </measure>
-              ${partXMLString}
-            </part>
+            ${partInfo.map(part => `
+              <part id="${part.id}">
+                <!-- Placeholder measure -->
+                <measure number="1">
+                  <note>
+                    <pitch>
+                      <step>C</step>
+                      <octave>4</octave>
+                    </pitch>
+                    <duration>4</duration>
+                    <type>quarter</type>
+                  </note>
+                </measure>
+                ${part.xml}
+              </part>
+            `).join('')}
           </score-partwise>
         `;
 
