@@ -48,6 +48,7 @@
   <script>
     let partInfo = [];
 
+    // Updated file URL as per your request
     const files = [
       { name: 'tbm.xml', url: 'https://raw.githubusercontent.com/georgeharrisca/6/e8fe775b35abcb9215466e3dbb708caaa3fd6f3f/tbm.xml' },
     ];
@@ -181,9 +182,8 @@
           return;
         }
 
-        // Wrap the part's XML in a complete MusicXML structure
+        // Wrap the part's XML in a complete MusicXML structure without XML declaration
         const wrappedXML = `
-          <?xml version="1.0" encoding="UTF-8"?>
           <score-partwise version="3.1">
             <work>
               <work-title>Sample Work</work-title>
@@ -200,7 +200,7 @@
           </score-partwise>
         `;
 
-        // Create the Blob with the wrapped XML
+        // Create the Blob with the wrapped XML, ensuring no XML declaration
         const partBlob = new Blob([wrappedXML], { type: "application/xml" });
         const url = URL.createObjectURL(partBlob);
         const link = document.createElement("a");
