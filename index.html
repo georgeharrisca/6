@@ -197,22 +197,20 @@
                 </score-part>
               `).join('')}
             </part-list>
-            ${partInfo.map(part => `
-              <part id="${part.id}">
-                <!-- Placeholder measure -->
-                <measure number="1">
-                  <note>
-                    <pitch>
-                      <step>C</step>
-                      <octave>4</octave>
-                    </pitch>
-                    <duration>4</duration>
-                    <type>quarter</type>
-                  </note>
-                </measure>
-                ${part.xml}
-              </part>
-            `).join('')}
+            <part id="${selectedPart.id}">
+              <!-- Placeholder measure -->
+              <measure number="1">
+                <note>
+                  <pitch>
+                    <step>C</step>
+                    <octave>4</octave>
+                  </pitch>
+                  <duration>4</duration>
+                  <type>quarter</type>
+                </note>
+              </measure>
+              ${selectedPart.xml}
+            </part>
           </score-partwise>
         `;
 
